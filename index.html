@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClearSum — Free Financial Calculators</title>
+<meta name="description" content="Free, accurate loan payoff, compound interest, and savings goal calculators. No signup, no ads blocking the math.">
+<style>
+  :root {
+    --ink:#1E2A38; --slate:#4A5A6A; --accent:#2F6F5E; --accent2:#C97B3D;
+    --bg:#F7F5F0; --card:#FFFFFF; --line:#E3E0D8;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding: 32px 20px 12px; text-align:center; }
+  header h1 { margin:0 0 6px; font-size: 30px; letter-spacing:-0.5px; }
+  header p { margin:0; color: var(--slate); font-size:15px; }
+  .tabs { display:flex; justify-content:center; gap:8px; margin:24px 0 0; flex-wrap:wrap; }
+  .tab { padding:10px 18px; border-radius:999px; background:var(--card); border:1px solid var(--line);
+         cursor:pointer; font-size:14px; font-weight:600; color:var(--slate); }
+  .tab.active { background:var(--accent); color:white; border-color:var(--accent); }
+  main { max-width: 760px; margin: 24px auto 60px; padding: 0 20px; }
+  .panel { display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; }
+  .panel.active { display:block; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .field { flex:1; min-width:160px; }
+  label { display:block; font-size:13px; font-weight:600; color:var(--slate); margin-bottom:6px; }
+  input { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:15px; }
+  .result { margin-top:20px; padding:20px; background:#F0F5F2; border-radius:12px; }
+  .result .big { font-size:28px; font-weight:700; color:var(--accent); }
+  .result .label { font-size:13px; color:var(--slate); margin-top:2px;}
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:14px; }
+  .stat { background:white; border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .stat .v { font-size:18px; font-weight:700; }
+  .stat .k { font-size:12px; color:var(--slate); }
+  table { width:100%; border-collapse:collapse; margin-top:16px; font-size:13px; }
+  th, td { text-align:right; padding:6px 8px; border-bottom:1px solid var(--line); }
+  th:first-child, td:first-child { text-align:left; }
+  .sched-wrap { max-height: 320px; overflow-y:auto; margin-top: 10px; border:1px solid var(--line); border-radius:10px; }
+  footer { text-align:center; color:var(--slate); font-size:13px; padding: 20px; }
+  .note { font-size:12px; color:var(--slate); margin-top:14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ClearSum</h1>
+  <p>Free financial calculators. Real math, no signup, no gimmicks.</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-panel="loan">Loan Payoff</div>
+  <div class="tab" data-panel="compound">Compound Interest</div>
+  <div class="tab" data-panel="goal">Savings Goal</div>
+  <div class="tab" data-panel="refi">Mortgage Refinance</div>
+  <div class="tab" data-panel="debt">Debt Payoff</div>
+  <div class="tab" data-panel="emergency">Emergency Fund</div>
+</div>
+
+<main>
+
+  <!-- LOAN PAYOFF -->
+  <section class="panel active" id="loan">
+    <div class="row">
+      <div class="field"><label>Loan amount ($)</label><input type="number" id="loanAmt" value="20000"></div>
+      <div class="field"><label>Annual interest rate (%)</label><input type="number" id="loanRate" value="6.5" step="0.01"></div>
+      <div class="field"><label>Term (years)</label><input type="number" id="loanYears" value="5"></div>
+    </div>
+    <div class="result">
+      <div class="big" id="loanPayment">—</div>
+      <div class="label">Monthly payment</div>
+      <div class="grid2">
+        <div class="stat"><div class="v" id="loanTotalPaid">—</div><div class="k">Total paid</div></div>
+        <div class="stat"><div class="v" id="loanTotalInterest">—</div><div class="k">Total interest</div></div>
+      </div>
+    </div>
+    <div class="sched-wrap">
+      <table id="loanSchedule"></table>
+    </div>
+    <div class="note">Standard amortizing loan formula: M = P·r(1+r)^n / ((1+r)^n − 1). Schedule shown yearly.</div>
+  </section>
+
+  <!-- COMPOUND INTEREST -->
+  <section class="panel" id="compound">
+    <div class="row">
+      <div class="field"><label>Starting amount ($)</label><input type="number" id="ciPrincipal" value="1000"></div>
+      <div class="field"><label>Monthly contribution ($)</label><input type="number" id="ciMonthly" value="100"></div>
+      <div class="field"><label>Annual return (%)</label><input type="number" id="ciRate" value="7" step="0.1"></div>
+      <div class="field"><label>Years</label><input type="number" id="ciYears" value="10"></div>
+    </div>
+    <div class="result">
+      <div class="big" id="ciFuture">—</div>
+      <div class="label">Estimated future value</div>
+      <div class="grid2">
+        <div class="stat"><div class="v" id="ciContributed">—</div><div class="k">Total contributed</div></div>
+        <div class="stat"><div class="v" id="ciGrowth">—</div><div class="k">Growth from interest</div></div>
+      </div>
+    </div>
+    <div class="note">Monthly compounding, contributions added at end of each month. Estimate only — actual returns vary and are never guaranteed.</div>
+  </section>
+
+  <!-- SAVINGS GOAL -->
+  <section class="panel" id="goal">
+    <div class="row">
+      <div class="field"><label>Goal amount ($)</label><input type="number" id="goalTarget" value="10000"></div>
+      <div class="field"><label>Already saved ($)</label><input type="number" id="goalStart" value="500"></div>
+      <div class="field"><label>Annual return (%)</label><input type="number" id="goalRate" value="4" step="0.1"></div>
+      <div class="field"><label>Months to reach goal</label><input type="number" id="goalMonths" value="24"></div>
+    </div>
+    <div class="result">
+      <div class="big" id="goalMonthly">—</div>
+      <div class="label">Required monthly contribution</div>
+    </div>
+    <div class="note">Assumes monthly compounding on the growing balance while you save.</div>
+  </section>
+
+  <!-- MORTGAGE REFINANCE BREAKEVEN -->
+  <section class="panel" id="refi">
+    <div class="row">
+      <div class="field"><label>Remaining balance ($)</label><input type="number" id="refiBalance" value="300000"></div>
+      <div class="field"><label>Current rate (%)</label><input type="number" id="refiCurRate" value="6.5" step="0.01"></div>
+      <div class="field"><label>Remaining term (years)</label><input type="number" id="refiCurYears" value="25"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>New rate (%)</label><input type="number" id="refiNewRate" value="5.5" step="0.01"></div>
+      <div class="field"><label>New term (years)</label><input type="number" id="refiNewYears" value="25"></div>
+      <div class="field"><label>Closing costs ($)</label><input type="number" id="refiCosts" value="4000"></div>
+    </div>
+    <div class="result">
+      <div class="big" id="refiSavings">—</div>
+      <div class="label">Monthly savings</div>
+      <div class="grid2">
+        <div class="stat"><div class="v" id="refiCurPmt">—</div><div class="k">Current payment</div></div>
+        <div class="stat"><div class="v" id="refiNewPmt">—</div><div class="k">New payment</div></div>
+      </div>
+      <div class="grid2">
+        <div class="stat"><div class="v" id="refiBreakeven">—</div><div class="k">Breakeven (months to recoup closing costs)</div></div>
+      </div>
+    </div>
+    <div class="note">Assumes closing costs paid out of pocket (not rolled into the new loan). Same amortizing-loan formula as the Loan Payoff tab.</div>
+  </section>
+
+  <!-- DEBT PAYOFF: SNOWBALL VS AVALANCHE -->
+  <section class="panel" id="debt">
+    <div class="row">
+      <div class="field"><label>Debt 1 balance ($)</label><input type="number" id="d1Bal" value="3000"></div>
+      <div class="field"><label>Debt 1 APR (%)</label><input type="number" id="d1Apr" value="24"></div>
+      <div class="field"><label>Debt 1 min payment ($)</label><input type="number" id="d1Min" value="60"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Debt 2 balance ($)</label><input type="number" id="d2Bal" value="8000"></div>
+      <div class="field"><label>Debt 2 APR (%)</label><input type="number" id="d2Apr" value="12"></div>
+      <div class="field"><label>Debt 2 min payment ($)</label><input type="number" id="d2Min" value="160"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Debt 3 balance ($)</label><input type="number" id="d3Bal" value="15000"></div>
+      <div class="field"><label>Debt 3 APR (%)</label><input type="number" id="d3Apr" value="6"></div>
+      <div class="field"><label>Debt 3 min payment ($)</label><input type="number" id="d3Min" value="250"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Extra payment per month ($)</label><input type="number" id="debtExtra" value="150"></div>
+    </div>
+    <div class="result">
+      <div class="grid2">
+        <div class="stat"><div class="v" id="snowballResult">—</div><div class="k">Snowball (smallest balance first): months / total interest</div></div>
+        <div class="stat"><div class="v" id="avalancheResult">—</div><div class="k">Avalanche (highest APR first): months / total interest</div></div>
+      </div>
+    </div>
+    <div class="note">Leave a debt's balance at 0 to ignore it. Avalanche minimizes total interest; snowball can be easier to stick with psychologically.</div>
+  </section>
+
+  <!-- EMERGENCY FUND -->
+  <section class="panel" id="emergency">
+    <div class="row">
+      <div class="field"><label>Essential monthly expenses ($)</label><input type="number" id="efExpenses" value="3000"></div>
+      <div class="field"><label>Current emergency savings ($)</label><input type="number" id="efSavings" value="4000"></div>
+      <div class="field"><label>Target coverage (months)</label><input type="number" id="efTargetMonths" value="6"></div>
+      <div class="field"><label>Months to reach goal</label><input type="number" id="efMonthsToGoal" value="12"></div>
+    </div>
+    <div class="result">
+      <div class="big" id="efMonthlyNeeded">—</div>
+      <div class="label">Monthly savings needed to close the gap</div>
+      <div class="grid2">
+        <div class="stat"><div class="v" id="efCoverage">—</div><div class="k">Current coverage</div></div>
+        <div class="stat"><div class="v" id="efTarget">—</div><div class="k">Target fund size</div></div>
+      </div>
+    </div>
+    <div class="note">Simple linear savings plan (no investment growth assumed — emergency funds should stay liquid, not invested).</div>
+  </section>
+
+</main>
+
+<footer>ClearSum — built for clarity, not clicks.<br>
+<span style="font-size:11px">All calculators are for educational purposes only and do not constitute financial advice. Results are estimates — consult a qualified professional before making financial decisions. · <a href="about.html" style="color:inherit">About</a> · <a href="privacy.html" style="color:inherit">Privacy</a></span></footer>
+
+<script>
+function fmt(n){ return "$" + n.toLocaleString(undefined, {maximumFractionDigits:2, minimumFractionDigits:2}); }
+
+// ---- Loan payoff ----
+function calcLoan(){
+  const P = parseFloat(document.getElementById('loanAmt').value) || 0;
+  const annualRate = parseFloat(document.getElementById('loanRate').value) || 0;
+  const years = parseFloat(document.getElementById('loanYears').value) || 0;
+  const n = Math.round(years * 12);
+  const r = (annualRate / 100) / 12;
+  let M;
+  if (r === 0) { M = n > 0 ? P / n : 0; }
+  else { M = P * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1); }
+  document.getElementById('loanPayment').textContent = fmt(M) + " / mo";
+  const totalPaid = M * n;
+  document.getElementById('loanTotalPaid').textContent = fmt(totalPaid);
+  document.getElementById('loanTotalInterest').textContent = fmt(totalPaid - P);
+
+  // yearly amortization schedule
+  let balance = P;
+  let rows = "<tr><th>Year</th><th>Paid</th><th>Interest</th><th>Principal</th><th>Balance</th></tr>";
+  for (let y = 1; y <= Math.ceil(years); y++){
+    let yearInterest = 0, yearPrincipal = 0;
+    const monthsThisYear = Math.min(12, n - (y-1)*12);
+    for (let m = 0; m < monthsThisYear; m++){
+      const interest = balance * r;
+      const principal = M - interest;
+      balance = Math.max(0, balance - principal);
+      yearInterest += interest;
+      yearPrincipal += principal;
+    }
+    rows += `<tr><td>${y}</td><td>${fmt(yearInterest+yearPrincipal)}</td><td>${fmt(yearInterest)}</td><td>${fmt(yearPrincipal)}</td><td>${fmt(balance)}</td></tr>`;
+  }
+  document.getElementById('loanSchedule').innerHTML = rows;
+}
+
+// ---- Compound interest ----
+function calcCompound(){
+  const P = parseFloat(document.getElementById('ciPrincipal').value) || 0;
+  const PMT = parseFloat(document.getElementById('ciMonthly').value) || 0;
+  const annualRate = parseFloat(document.getElementById('ciRate').value) || 0;
+  const years = parseFloat(document.getElementById('ciYears').value) || 0;
+  const n = Math.round(years * 12);
+  const r = (annualRate / 100) / 12;
+  let FV;
+  if (r === 0) { FV = P + PMT * n; }
+  else { FV = P * Math.pow(1+r, n) + PMT * ((Math.pow(1+r, n) - 1) / r); }
+  const contributed = P + PMT * n;
+  document.getElementById('ciFuture').textContent = fmt(FV);
+  document.getElementById('ciContributed').textContent = fmt(contributed);
+  document.getElementById('ciGrowth').textContent = fmt(FV - contributed);
+}
+
+// ---- Savings goal ----
+function calcGoal(){
+  const FV = parseFloat(document.getElementById('goalTarget').value) || 0;
+  const P = parseFloat(document.getElementById('goalStart').value) || 0;
+  const annualRate = parseFloat(document.getElementById('goalRate').value) || 0;
+  const n = Math.round(parseFloat(document.getElementById('goalMonths').value)) || 0;
+  const r = (annualRate / 100) / 12;
+  let PMT;
+  if (n <= 0) { PMT = 0; }
+  else if (r === 0) { PMT = (FV - P) / n; }
+  else { PMT = (FV - P * Math.pow(1+r, n)) * r / (Math.pow(1+r, n) - 1); }
+  document.getElementById('goalMonthly').textContent = fmt(Math.max(0, PMT)) + " / mo";
+}
+
+// ---- Mortgage refinance breakeven ----
+function loanPaymentGeneric(P, annualRate, n){
+  const r = (annualRate/100)/12;
+  if(r===0) return n>0 ? P/n : 0;
+  return P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+}
+function calcRefi(){
+  const bal = parseFloat(document.getElementById('refiBalance').value) || 0;
+  const curRate = parseFloat(document.getElementById('refiCurRate').value) || 0;
+  const curYears = parseFloat(document.getElementById('refiCurYears').value) || 0;
+  const newRate = parseFloat(document.getElementById('refiNewRate').value) || 0;
+  const newYears = parseFloat(document.getElementById('refiNewYears').value) || 0;
+  const costs = parseFloat(document.getElementById('refiCosts').value) || 0;
+  const curPmt = loanPaymentGeneric(bal, curRate, curYears*12);
+  const newPmt = loanPaymentGeneric(bal, newRate, newYears*12);
+  const savings = curPmt - newPmt;
+  document.getElementById('refiCurPmt').textContent = fmt(curPmt);
+  document.getElementById('refiNewPmt').textContent = fmt(newPmt);
+  document.getElementById('refiSavings').textContent = fmt(savings) + " / mo";
+  document.getElementById('refiBreakeven').textContent = savings > 0
+    ? (costs / savings).toFixed(1) + " months"
+    : "never (new payment isn't lower)";
+}
+
+// ---- Debt payoff: snowball vs avalanche ----
+function simulateDebt(debts, extra, strategy){
+  debts = debts.filter(d => d.balance > 0).map(d => ({...d}));
+  if (debts.length === 0) return {months: 0, totalInterest: 0};
+  const order = strategy === "snowball"
+    ? [...debts].sort((a,b) => a.balance - b.balance)
+    : [...debts].sort((a,b) => b.apr - a.apr);
+  const baseMin = debts.reduce((s,d) => s + d.minPayment, 0);
+  let months = 0, totalInterest = 0;
+  while (order.some(d => d.balance > 0.01) && months < 1200){
+    months++;
+    for (const d of order){
+      if (d.balance <= 0) continue;
+      const interest = d.balance * ((d.apr/100)/12);
+      totalInterest += interest;
+      d.balance += interest;
+    }
+    let pool = baseMin + extra;
+    for (const d of order){
+      if (d.balance <= 0) continue;
+      const pay = Math.min(d.balance, d.minPayment);
+      d.balance -= pay; pool -= pay;
+    }
+    for (const d of order){
+      if (pool <= 0) break;
+      if (d.balance <= 0) continue;
+      const pay = Math.min(d.balance, pool);
+      d.balance -= pay; pool -= pay;
+    }
+  }
+  return {months, totalInterest};
+}
+function calcDebt(){
+  const debts = [
+    {balance: parseFloat(document.getElementById('d1Bal').value)||0, apr: parseFloat(document.getElementById('d1Apr').value)||0, minPayment: parseFloat(document.getElementById('d1Min').value)||0},
+    {balance: parseFloat(document.getElementById('d2Bal').value)||0, apr: parseFloat(document.getElementById('d2Apr').value)||0, minPayment: parseFloat(document.getElementById('d2Min').value)||0},
+    {balance: parseFloat(document.getElementById('d3Bal').value)||0, apr: parseFloat(document.getElementById('d3Apr').value)||0, minPayment: parseFloat(document.getElementById('d3Min').value)||0},
+  ];
+  const extra = parseFloat(document.getElementById('debtExtra').value) || 0;
+  const snow = simulateDebt(debts, extra, "snowball");
+  const ava = simulateDebt(debts, extra, "avalanche");
+  document.getElementById('snowballResult').textContent = `${snow.months} mo / ${fmt(snow.totalInterest)}`;
+  document.getElementById('avalancheResult').textContent = `${ava.months} mo / ${fmt(ava.totalInterest)}`;
+}
+
+// ---- Emergency fund ----
+function calcEmergency(){
+  const expenses = parseFloat(document.getElementById('efExpenses').value) || 0;
+  const savings = parseFloat(document.getElementById('efSavings').value) || 0;
+  const targetMonths = parseFloat(document.getElementById('efTargetMonths').value) || 0;
+  const monthsToGoal = parseFloat(document.getElementById('efMonthsToGoal').value) || 0;
+  const target = expenses * targetMonths;
+  const coverage = expenses > 0 ? savings / expenses : 0;
+  const shortfall = Math.max(0, target - savings);
+  const monthlyNeeded = monthsToGoal > 0 ? shortfall / monthsToGoal : 0;
+  document.getElementById('efTarget').textContent = fmt(target);
+  document.getElementById('efCoverage').textContent = coverage.toFixed(1) + " months";
+  document.getElementById('efMonthlyNeeded').textContent = fmt(monthlyNeeded) + " / mo";
+}
+
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
+  calcLoan(); calcCompound(); calcGoal(); calcRefi(); calcDebt(); calcEmergency();
+}));
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+calcLoan(); calcCompound(); calcGoal(); calcRefi(); calcDebt(); calcEmergency();
+</script>
+
+</body>
+</html>
